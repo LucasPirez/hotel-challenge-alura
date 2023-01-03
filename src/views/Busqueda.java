@@ -5,16 +5,26 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+
+import sql.connection.ConnectionFactory;
+
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JButton;
+import javax.management.timer.Timer;
 import javax.swing.ImageIcon;
 import java.awt.Color;
 import java.awt.SystemColor;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TimerTask;
 import java.awt.event.ActionEvent;
 import javax.swing.JTabbedPane;
 import java.awt.Toolkit;
@@ -23,7 +33,14 @@ import javax.swing.JSeparator;
 import javax.swing.ListSelectionModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.ParseException;
 
 @SuppressWarnings("serial")
 public class Busqueda extends JFrame {
@@ -87,9 +104,6 @@ public class Busqueda extends JFrame {
 		panel.setFont(new Font("Roboto", Font.PLAIN, 16));
 		panel.setBounds(20, 169, 865, 328);
 		contentPane.add(panel);
-
-		
-		
 		
 		tbReservas = new JTable();
 		tbReservas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -101,7 +115,7 @@ public class Busqueda extends JFrame {
 		modelo.addColumn("Fecha Check Out");
 		modelo.addColumn("Valor");
 		modelo.addColumn("Forma de Pago");
-		
+	
 		
 		tbHuespedes = new JTable();
 		tbHuespedes.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -115,6 +129,42 @@ public class Busqueda extends JFrame {
 		modeloH.addColumn("Nacionalidad");
 		modeloH.addColumn("Telefono");
 		modeloH.addColumn("Numero de Reserva");
+		
+		
+//		logica de mostrar huespedes
+		
+		Connection con;
+		List<Map<String ,String>> arr = null;
+		try {
+			con = new ConnectionFactory().recuperarCenexion();
+			PreparedStatement statement = con.prepareStatement("SELECT * FROM TBHUESPEDES");
+			 statement.execute();
+			 
+			 ResultSet resultSet = statement.getResultSet();
+			 
+				arr = new ArrayList<>();
+			
+				while (resultSet.next()) {
+					Map<String ,String> fila = new HashMap<>();
+				
+					fila.put("ID",String.valueOf(resultSet.getInt("ID")));
+					fila.put("Nombre",resultSet.getString("Nombre"));
+					fila.put("Apellido",resultSet.getString("Apellido"));
+					fila.put("FechaNacimiento",String.valueOf(resultSet.getDate("FechaNacimiento")));
+					fila.put("Nacionalidad",resultSet.getString("Nacionalidad"));
+					fila.put("Telefono" , String.valueOf(resultSet.getInt("Telefono")));
+					
+					arr.add(fila);
+				}
+			con.close();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		arr.forEach(a -> modeloH.addRow(new Object[] { a.get("ID"), a.get("Nombre"), a.get("Apellido"),
+				a.get("FechaNacimiento"), a.get("Nacionalidad"), a.get("Telefono")}));
+		
+//		fin de logica
 		
 		JLabel lblNewLabel_2 = new JLabel("");
 		lblNewLabel_2.setIcon(new ImageIcon(Busqueda.class.getResource("/imagenes/Ha-100px.png")));
@@ -241,6 +291,34 @@ public class Busqueda extends JFrame {
 		lblEditar.setBounds(0, 0, 122, 35);
 		btnEditar.add(lblEditar);
 		
+		
+		btnEditar.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				HashMap<String, String> producto = new HashMap<String,String>();
+				producto.put("ID",(String) modeloH.getValueAt(tbHuespedes.getSelectedRow(),0));
+				producto.put("Nombre",(String) modeloH.getValueAt(tbHuespedes.getSelectedRow(),1));
+				producto.put("Apellido",(String) modeloH.getValueAt(tbHuespedes.getSelectedRow(),2));
+				producto.put("Nacimiento", (String) modeloH.getValueAt(tbHuespedes.getSelectedRow(),3));
+				producto.put("Nacionalidad", (String) modeloH.getValueAt(tbHuespedes.getSelectedRow(),4));
+				producto.put("Telefono", (String) modeloH.getValueAt(tbHuespedes.getSelectedRow(),5));
+				
+				
+				RegistroHuesped registro = new RegistroHuesped();
+				registro.setVisible(true);
+				
+				try {
+					registro.completeInputs(producto);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		
 		JPanel btnEliminar = new JPanel();
 		btnEliminar.setLayout(null);
 		btnEliminar.setBackground(new Color(12, 138, 199));
@@ -255,6 +333,67 @@ public class Busqueda extends JFrame {
 		lblEliminar.setBounds(0, 0, 122, 35);
 		btnEliminar.add(lblEliminar);
 		setResizable(false);
+		
+		MouseListener oyenteMouse = new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				Connection con;
+				try {
+					con = new ConnectionFactory().recuperarCenexion();
+					
+					java.sql.PreparedStatement statement =  con.prepareStatement("DELETE FROM TBHUESPEDES WHERE ID = ?");
+					
+					statement.setInt(1, Integer.parseInt((String) modeloH.getValueAt(tbHuespedes.getSelectedRow(),0)));
+					
+					statement.execute();
+					System.out.println("caca");
+					
+					modeloH.removeRow(tbHuespedes.getSelectedRow());
+					
+					int cantidadEliminada = statement.getUpdateCount();
+					
+					if(cantidadEliminada == 1) {
+						JOptionPane.showMessageDialog(null, cantidadEliminada + "  Eliminada Con Exito");
+					}else {
+						JOptionPane.showMessageDialog(null,"Ha Ocurrido un Error");
+					}
+					
+					con.close();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+	
+		};
+		btnEliminar.addMouseListener(oyenteMouse);
 	}
 	
 //Código que permite mover la ventana por la pantalla según la posición de "x" y "y"

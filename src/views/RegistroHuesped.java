@@ -6,7 +6,12 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JTextField;
 import java.awt.Color;
+
+import com.mchange.v2.lock.SimpleSharedUseExclusiveUseLock;
+import com.mysql.cj.xdevapi.Statement;
 import com.toedter.calendar.JDateChooser;
+
+import sql.connection.ConnectionFactory;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
@@ -19,7 +24,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.Format;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.awt.event.ActionEvent;
 import java.awt.Toolkit;
 import javax.swing.SwingConstants;
@@ -37,6 +49,8 @@ public class RegistroHuesped extends JFrame {
 	private JComboBox<Format> txtNacionalidad;
 	private JLabel labelExit;
 	private JLabel labelAtras;
+	private JLabel labelGuardar;
+	private String IDEdit;
 	int xMouse, yMouse;
 
 	/**
@@ -166,7 +180,7 @@ public class RegistroHuesped extends JFrame {
 		lblApellido.setFont(new Font("Roboto Black", Font.PLAIN, 18));
 		contentPane.add(lblApellido);
 		
-		JLabel lblFechaN = new JLabel("FECHA DE NACIMIENTO");
+		JLabel lblFechaN = new JLabel("FECHADE");
 		lblFechaN.setBounds(560, 256, 255, 14);
 		lblFechaN.setForeground(SystemColor.textInactiveText);
 		lblFechaN.setFont(new Font("Roboto Black", Font.PLAIN, 18));
@@ -253,14 +267,33 @@ public class RegistroHuesped extends JFrame {
 		btnguardar.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+			
+				SimpleDateFormat format  = new SimpleDateFormat("yyyy-MM-dd");
+				String date = format.format(txtFechaN.getDate());
+				
+				HashMap<String, String> producto = new HashMap<String,String>();
+				producto.put("Nombre",txtNombre.getText());
+				producto.put("Apellido", txtApellido.getText());
+				producto.put("Nacimiento", date);
+				producto.put("Nacionalidad", txtNacionalidad.getSelectedItem().toString());
+				producto.put("Telefono", txtTelefono.getText());
+				
+				if(labelGuardar.getText() == "Guardar Edicion") {
+					guardarEdicion(producto);
+				}else {
+									
+				guardar(producto);
+				}
+				
 			}
+		
 		});
 		btnguardar.setLayout(null);
 		btnguardar.setBackground(new Color(12, 138, 199));
 		contentPane.add(btnguardar);
 		btnguardar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 		
-		JLabel labelGuardar = new JLabel("GUARDAR");
+		 labelGuardar = new JLabel("GUARDAR");
 		labelGuardar.setHorizontalAlignment(SwingConstants.CENTER);
 		labelGuardar.setForeground(Color.WHITE);
 		labelGuardar.setFont(new Font("Roboto", Font.PLAIN, 18));
@@ -315,6 +348,91 @@ public class RegistroHuesped extends JFrame {
 		labelExit.setFont(new Font("Roboto", Font.PLAIN, 18));
 	}
 	
+	
+	public void guardar(Map<String ,String> producto) {
+		
+		try {
+			Connection con = new ConnectionFactory().recuperarCenexion();
+			
+		
+			java.sql.PreparedStatement statement =  con.prepareStatement("INSERT INTO TBHUESPEDES (Nombre, Apellido, FechaNacimiento, Nacionalidad, Telefono) "
+					+ " VALUES(?,?,?,?,?)",
+			java.sql.Statement.RETURN_GENERATED_KEYS
+					);
+			
+			statement.setString(1, producto.get("Nombre"));
+			statement.setString(2,producto.get("Apellido"));
+			statement.setString(3,producto.get("Nacimiento"));
+			statement.setString(4,producto.get("Nacionalidad"));
+			statement.setInt(5,Integer.valueOf(producto.get("Telefono")));
+			statement.execute();
+			
+			ResultSet resultSet = statement.getGeneratedKeys();
+			
+			while(resultSet.next()) {
+				System.out.println("fue insertado el id numero " + resultSet.getInt(1));
+				resultSet.getInt(1);
+			}
+			
+			con.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public void completeInputs(Map<String,String> huesped) throws SQLException, ParseException {	
+		java.util.Date fechaParseada= new SimpleDateFormat("yyyy/MM/dd").parse(huesped.get("Nacimiento").replaceAll("-","/"));
+		txtNombre.setText(huesped.get("Nombre"));
+		txtApellido.setText(huesped.get("Apellido"));
+		txtFechaN.setDate(fechaParseada);
+		txtNacionalidad.setSelectedItem(huesped.get("Nacionalidad"));
+		txtTelefono.setText(huesped.get("Telefono"));
+		
+		IDEdit = huesped.get("ID");
+		System.out.println(IDEdit);
+		labelGuardar.setText("Guardar Edicion");
+	}
+	
+	public void guardarEdicion(Map<String ,String> producto) {
+		try {
+			Connection con = new ConnectionFactory().recuperarCenexion();
+				
+			java.sql.PreparedStatement statement = con.prepareStatement("UPDATE TBHUESPEDES SET "
+					+ " Nombre = ?" 
+					+ ", Apellido = ?" 
+					+ ", FechaNacimiento = ?"
+					+ ", Nacionalidad = ?"
+					+ ", Telefono = ?" 
+					+ "  WHERE ID = ?");
+			
+			statement.setString(1,producto.get("Nombre"));
+			statement.setString(2, producto.get("Apellido"));
+			statement.setString(3,producto.get("Nacimiento"));
+			statement.setString(4,producto.get("Nacionalidad"));
+			statement.setInt(5, Integer.valueOf(producto.get("Telefono")));
+			statement.setInt(6,Integer.parseInt(IDEdit));
+			statement.execute();
+				
+			
+			int updateCount = statement.getUpdateCount();
+			
+			if(updateCount == 0) {
+				JOptionPane.showMessageDialog(this,"No se ha actualizado ningun valor");
+			}else {
+				JOptionPane.showMessageDialog(this, "Se han actualizado " + updateCount +" valores");
+			}
+				
+
+			con.close();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	
 	//Código que permite mover la ventana por la pantalla según la posición de "x" y "y"	
 	 private void headerMousePressed(java.awt.event.MouseEvent evt) {

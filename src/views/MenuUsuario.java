@@ -29,7 +29,7 @@ public class MenuUsuario extends JFrame {
 	private JLabel labelExit;
 	private JLabel labelRegistro;
 
-	/**
+	/**F
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
@@ -108,10 +108,10 @@ public class MenuUsuario extends JFrame {
 		panelMenu.add(btnRegistro);
 		btnRegistro.setLayout(null);
 		
-		labelRegistro = new JLabel("Registro de reservas");
+		labelRegistro = new JLabel("<html><body>Registro de reserva <br>cliente nuevo<br></body></html>");
 		labelRegistro.setIcon(new ImageIcon(MenuUsuario.class.getResource("/imagenes/reservado.png")));
 		labelRegistro.setForeground(SystemColor.text);
-		labelRegistro.setBounds(25, 11, 205, 34);
+		labelRegistro.setBounds(25, 11, 205, 50);
 		labelRegistro.setFont(new Font("Roboto", Font.PLAIN, 18));
 		labelRegistro.setHorizontalAlignment(SwingConstants.LEFT);
 		btnRegistro.add(labelRegistro);

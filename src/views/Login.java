@@ -5,6 +5,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import com.alura.jdbc.DAO.UserDAO;
+
+import sql.connection.ConnectionFactory;
+
 import java.awt.ActiveEvent;
 import java.awt.Color;
 import javax.swing.JLabel;
@@ -36,6 +40,7 @@ public class Login extends JFrame {
 	private JPasswordField txtContrasena;
 	int xMouse, yMouse;
 	private JLabel labelExit;
+	private JLabel lblNewLabel;
 
 	/**
 	 * Launch the application.
@@ -44,7 +49,7 @@ public class Login extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Login frame = new Login();
+					Login frame = new Login(null);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -56,7 +61,8 @@ public class Login extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public Login() {
+	public Login(String superUser) {
+		
 		setResizable(false);
 		setUndecorated(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -158,7 +164,7 @@ public class Login extends JFrame {
 		JLabel labelTitulo = new JLabel("INICIAR SESIÓN");
 		labelTitulo.setForeground(SystemColor.textHighlight);
 		labelTitulo.setFont(new Font("Roboto Black", Font.PLAIN, 26));
-		labelTitulo.setBounds(65, 149, 202, 26);
+		labelTitulo.setBounds(65, 149, 352, 26);
 		panel.add(labelTitulo);
 		
 		JSeparator separator_1 = new JSeparator();
@@ -193,35 +199,42 @@ public class Login extends JFrame {
 		LabelUsuario.setBounds(65, 219, 107, 26);
 		panel.add(LabelUsuario);
 		
-		JLabel lblContrasea = new JLabel("CONTRASEÑA");
-		lblContrasea.setForeground(SystemColor.textInactiveText);
-		lblContrasea.setFont(new Font("Roboto Black", Font.PLAIN, 20));
-		lblContrasea.setBounds(65, 316, 140, 26);
-		panel.add(lblContrasea);
-		
 		JPanel btnLogin = new JPanel();
 		btnLogin.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				btnLogin.setBackground(new Color(0, 156, 223));
 			}
-		
+			
 			@Override
 			public void mouseExited(MouseEvent e) {
 				btnLogin.setBackground(SystemColor.textHighlight);
 			}
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				Login();
+				if(lblNewLabel.getText().equals("Autenticar")){
+					autenticar();
+				}else if(lblNewLabel.getText().equals("Crear Usuario")) {					
+				crearUsuario();
+				}else {	
+					Login();
+				}
 			}
 		});
+		
+		JLabel lblContrasea = new JLabel("CONTRASEÑA");
+		lblContrasea.setForeground(SystemColor.textInactiveText);
+		lblContrasea.setFont(new Font("Roboto Black", Font.PLAIN, 20));
+		lblContrasea.setBounds(65, 316, 140, 26);
+		panel.add(lblContrasea);
+		
 		btnLogin.setBackground(SystemColor.textHighlight);
 		btnLogin.setBounds(65, 431, 122, 44);
 		panel.add(btnLogin);
 		btnLogin.setLayout(null);
 		btnLogin.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 		
-		JLabel lblNewLabel = new JLabel("ENTRAR");
+		lblNewLabel = new JLabel("ENTRAR");
 		lblNewLabel.setBounds(0, 0, 122, 44);
 		btnLogin.add(lblNewLabel);
 		lblNewLabel.setForeground(SystemColor.controlLtHighlight);
@@ -236,6 +249,7 @@ public class Login extends JFrame {
 		
 		JPanel header = new JPanel();
 		header.addMouseMotionListener(new MouseMotionAdapter() {
+			
 			@Override
 			public void mouseDragged(MouseEvent e) {
 				headerMouseDragged(e);
@@ -243,36 +257,75 @@ public class Login extends JFrame {
 			}
 		});
 		header.addMouseListener(new MouseAdapter() {
+			
 			@Override
 			public void mousePressed(MouseEvent e) {
 				headerMousePressed(e);
 			}
 		});
+		
 		header.setBackground(SystemColor.window);
 		header.setBounds(0, 0, 784, 36);
 		panel.add(header);
 		header.setLayout(null);
+		
+		
+		if(superUser == "autenticarSuperUsuario") {
+			labelTitulo.setText("Super Usuario Sesion");
+			lblNewLabel.setText("Autenticar");
+		}
 	}
 	
 	private void Login() {
-		 String Usuario= "admin";
-	     String Contraseña="admin";
-
+			UserDAO userDAO = new UserDAO(new ConnectionFactory().recuperarCenexion());
+			
 	        String contrase=new String (txtContrasena.getPassword());
-
-	        if(txtUsuario.getText().equals(Usuario) && contrase.equals(Contraseña)){
+	        String usuario = txtUsuario.getText();
+	        String v  = userDAO.verificarUser(usuario);
+	        
+	        if(v != null) {
+	        	
+	        if(v.equals(contrase)){
 	            MenuUsuario menu = new MenuUsuario();
 	            menu.setVisible(true);
 	            dispose();	 
+	            
 	        }else {
 	            JOptionPane.showMessageDialog(this, "Usuario o Contraseña no válidos");
+
+	        }
 	        }
 	} 
+	
+//		String[] arr = {txtUsuario.getText(),new String (txtContrasena.getPassword())};
+	
+	private void crearUsuario() {
+		
+		UserDAO userDAO = new UserDAO(new ConnectionFactory().recuperarCenexion());
+		String contrase=new String (txtContrasena.getPassword());
+        String usuario = txtUsuario.getText();
+		
+		userDAO.createUser(usuario,contrase);
+		
+		
+	}
+	
+	private void autenticar() {
+		
+		  String contrase=new String (txtContrasena.getPassword());
+	      String usuario = txtUsuario.getText();
+		
+	      if(contrase.equals("6666") && usuario.equals("superUsuario")) {
+	    	  txtContrasena.setText("");
+	    	  txtUsuario.setText("");
+	    	  lblNewLabel.setText("Crear Usuario");
+	      }
+	}
+	
 	 private void headerMousePressed(java.awt.event.MouseEvent evt) {
 	        xMouse = evt.getX();
 	        yMouse = evt.getY();
 	    }//GEN-LAST:event_headerMousePressed
-
 	    private void headerMouseDragged(java.awt.event.MouseEvent evt) {
 	        int x = evt.getXOnScreen();
 	        int y = evt.getYOnScreen();

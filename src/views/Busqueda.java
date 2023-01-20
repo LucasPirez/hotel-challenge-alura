@@ -61,7 +61,6 @@ public class Busqueda extends JFrame {
 	private JLabel labelExit;
 	TipoBusqueda tipoBusqueda;
 	int xMouse, yMouse;
-
 	/**
 	 * Launch the application.
 	 */
@@ -77,7 +76,6 @@ public class Busqueda extends JFrame {
 			}
 		});
 	}
-
 	/**
 	 * Create the frame.
 	 */
@@ -387,20 +385,15 @@ public class Busqueda extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (panel.getSelectedIndex() == 0) {
-
 					ReservaDAO reservaDAO = new ReservaDAO(new ConnectionFactory().recuperarCenexion());
-
 					reservaDAO.eliminarReserva((int) modelo.getValueAt(tbReservas.getSelectedRow(), 0));
-
 					modelo.removeRow(tbReservas.getSelectedRow());
 				} else {
 					HuespedDAO huesped = new HuespedDAO(new ConnectionFactory().recuperarCenexion());
 					Object e1 = modeloH.getValueAt(tbHuespedes.getSelectedRow(), 0);
-
 					huesped.eliminarHuesped(e1);
 					modeloH.removeRow(tbHuespedes.getSelectedRow());
 				}
-
 			}
 
 			@Override
@@ -437,7 +430,6 @@ public class Busqueda extends JFrame {
 
 		RegistroHuesped registro = new RegistroHuesped();
 		registro.setVisible(true);
-
 		registro.completeInputs(huesped);
 	}
 	

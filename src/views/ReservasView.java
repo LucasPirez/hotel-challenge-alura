@@ -90,7 +90,6 @@ public class ReservasView extends JFrame {
 		setLocationRelativeTo(null);
 		setUndecorated(true);
 		
-		
 		JPanel panel = new JPanel();
 		panel.setBorder(null);
 		panel.setBackground(Color.WHITE);
@@ -385,12 +384,12 @@ public class ReservasView extends JFrame {
 		btnReserva = new JPanel();
 		btnReserva.setLayout(null);
 		btnReserva.setBackground(new Color(12, 138, 199));
-		btnReserva.setBounds(120, 493, 122, 35);
+		btnReserva.setBounds(100, 493, 122, 35);
 		btnReserva.setVisible(false);
 		btnReserva.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 		panel.add(btnReserva);
 
-		 lblReserva = new JLabel("Reservar");
+		lblReserva = new JLabel("Reservar");
 		lblReserva.setHorizontalAlignment(SwingConstants.CENTER);
 		lblReserva.setForeground(Color.WHITE);
 		lblReserva.setFont(new Font("Roboto", Font.PLAIN, 18));
@@ -402,7 +401,12 @@ public class ReservasView extends JFrame {
 			public void mouseClicked(MouseEvent e) {
 				ReservaDAO reservaDAO = new ReservaDAO(new ConnectionFactory().recuperarCenexion());
 				if(lblReserva.getText() == "Reservar") {
-				reservaDAO.guardarReserva(generarReserva());
+				int n =reservaDAO.guardarReserva(generarReserva());
+				if(n != -1) {
+					dispose();
+				}else {
+					JOptionPane.showMessageDialog(null, "Ocurrio un Error");
+				}
 				}else {
 				reservaDAO.editarReserva(generarReserva());
 				}

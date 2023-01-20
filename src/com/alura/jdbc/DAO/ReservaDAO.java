@@ -43,7 +43,8 @@ public class ReservaDAO {
 		return lista;
 	}
 
-	public void guardarReserva(Reserva reserva) {
+	public int guardarReserva(Reserva reserva) {
+		int n = -1;
 		try (con) {
 			final PreparedStatement statement = con.prepareStatement(
 					"INSERT INTO TBRESERVA (ID_persona, Fecha_entrada, Fecha_salida, valor, Forma_pago,Tipo_habitacion) "
@@ -64,6 +65,7 @@ public class ReservaDAO {
 
 				try (resultSet) {
 					while (resultSet.next()) {
+						n = resultSet.getInt(1);
 						System.out.println(String.format("Se realizo la siguiente reserva: %s", reserva));
 					}
 				}
@@ -71,6 +73,7 @@ public class ReservaDAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return n;
 	}
 	
 	public void editarReserva(Reserva reserva) {

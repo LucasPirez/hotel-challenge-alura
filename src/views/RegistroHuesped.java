@@ -386,8 +386,15 @@ public class RegistroHuesped extends JFrame {
 	public void guardar(Huesped huesped) throws SQLException {
 		HuespedDAO huespedDAO = new HuespedDAO(new ConnectionFactory().recuperarCenexion());
 
-		huespedDAO.guardar(huesped);
-
+	int n=	huespedDAO.guardar(huesped);
+		if(n  != -1) {
+			txtNombre.setText("");
+			txtApellido.setText("");
+			txtNacionalidad.setSelectedIndex(0);
+			txtTelefono.setText("");
+		}else {
+			JOptionPane.showMessageDialog(null,"Ha ocurrido un error");
+		}
 	}
 
 	public void completeInputs(Huesped huesped) {

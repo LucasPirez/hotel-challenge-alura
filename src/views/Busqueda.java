@@ -4,15 +4,18 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.table.DefaultTableModel;
 
 import com.alura.jdbc.DAO.HuespedDAO;
 import com.alura.jdbc.DAO.ReservaDAO;
 import com.alura.jdbc.modelo.Huesped;
 import com.alura.jdbc.modelo.Reserva;
-import com.alura.nuevaReserva.TipoBusqueda;
+import com.alura.nuevaBusqueda.TipoBusqueda;
 
 import sql.connection.ConnectionFactory;
+import util.ResetRows;
 
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -96,6 +99,8 @@ public class Busqueda extends JFrame {
 		txtBuscar.setBorder(javax.swing.BorderFactory.createEmptyBorder());
 		contentPane.add(txtBuscar);
 		txtBuscar.setColumns(10);
+		
+		
 
 		JLabel lblNewLabel_4 = new JLabel("SISTEMA DE BÚSQUEDA");
 		lblNewLabel_4.setForeground(new Color(12, 138, 199));
@@ -250,31 +255,27 @@ public class Busqueda extends JFrame {
 		separator_1_2.setBackground(new Color(12, 138, 199));
 		separator_1_2.setBounds(539, 159, 193, 2);
 		contentPane.add(separator_1_2);
+		
+txtBuscar.addCaretListener(new CaretListener() {
+			
+			@Override
+			public void caretUpdate(CaretEvent e) {
+				
+			if(txtBuscar.getText().equals("")){
+				ResetRows resetRows = new ResetRows(panel.getSelectedIndex(),tbReservas,tbHuespedes,modelo,modeloH);
+				resetRows.reset();
+			}
+			}
+		});
 
 		JPanel btnbuscar = new JPanel();
 		btnbuscar.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				 if(panel.getSelectedIndex() == 0) {
-					 int filas = tbReservas.getRowCount();
-					 
-				    for (int a = 0; filas > a; a++) {
-				       modelo.removeRow(0);
-				    }
-				ReservaDAO reservaDAO = new ReservaDAO(new ConnectionFactory().recuperarCenexion());
-				reservaDAO.listarBusqueda(tipoBusqueda.itemSelected(),txtBuscar.getText()).forEach(a -> modelo.addRow(new Object[] { a.getID(), a.getID_persona(),
-						a.getFecha_entrada(), a.getFecha_salida(), a.getValor(), a.getForma_pago(),a.getTipoHabitacion()}));
-				 }else {
-					 int filas = tbHuespedes.getRowCount();
-					 for(int a=0; filas>a;a++) {
-						 modeloH.removeRow(0);
-					 }
-					 HuespedDAO huespedDAO = new HuespedDAO(new ConnectionFactory().recuperarCenexion());
-				 
-					 huespedDAO.listarBusqueda(tipoBusqueda.itemSelected(), txtBuscar.getText()).forEach(a -> modeloH.addRow(new Object[] { a.getID(), a.getNombre(), a.getApellido(),
-								a.getFechaNacimiento(), a.getNacionalidad(), a.getTelefono() }));
-				 
-				 }
+				if(!txtBuscar.getText().equals("")) {
+					ResetRows resetRows = new ResetRows(panel.getSelectedIndex(),tbReservas,tbHuespedes,modelo,modeloH);
+					resetRows.listarBusqueda(tipoBusqueda.itemSelected(),txtBuscar.getText());
+				}
 			}
 		});
 		
@@ -441,7 +442,7 @@ public class Busqueda extends JFrame {
 		float valor = (float) modelo.getValueAt(tbReservas.getSelectedRow(),4);
 		String formaPago = modelo.getValueAt(tbReservas.getSelectedRow(), 5).toString();
 		String tipoHabitacion = modelo.getValueAt(tbReservas.getSelectedRow(), 6).toString();
-		
+		System.out.println(IDPersona);
 		Reserva reserva = new Reserva(fechaEntrada, fechaSalida,valor,formaPago,tipoHabitacion);
 		reserva.setID(ID);
 		reserva.setID_persona(IDPersona);

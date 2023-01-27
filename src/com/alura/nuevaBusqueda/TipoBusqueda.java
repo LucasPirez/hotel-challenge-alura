@@ -1,4 +1,4 @@
-package com.alura.nuevaReserva;
+package com.alura.nuevaBusqueda;
 
 import java.awt.Color;
 import java.awt.Font;

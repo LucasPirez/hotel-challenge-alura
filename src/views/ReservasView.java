@@ -420,12 +420,11 @@ public class ReservasView extends JFrame {
 		String d2 = formatDate.getFormatSQL(txtFechaS.getDate());
 		float d3  = (float) Integer.parseInt(txtValor.getText().toString());
 		String tipoHabitacion = txtTipoHabitacion.getSelectedItem().toString();
-		
 		Reserva reserva = new Reserva(d1, d2, d3, txtFormaPago.getSelectedItem().toString(),tipoHabitacion);
 
 		reserva.setID_persona(ID_persona);
 		reserva.setID(ID);
-		System.out.println(ID);
+		
 		return reserva;
 	}
 
@@ -433,6 +432,7 @@ public class ReservasView extends JFrame {
 
 		DateSQL d = new DateSQL();
 
+		txtTipoHabitacion.setSelectedItem(reserva.getTipoHabitacion());
 		txtFechaE.setDate(d.formatDateInput(reserva.getFecha_entrada()));
 		txtFechaS.setDate(d.formatDateInput(reserva.getFecha_salida()));
 //			txtValor.setText(reserva.getValor());

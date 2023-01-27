@@ -103,7 +103,7 @@ public class MenuUsuario extends JFrame {
 				dispose();
 			}
 		});
-		btnRegistro.setBounds(0, 255, 257, 56);
+		btnRegistro.setBounds(0, 255, 257, 85);
 		btnRegistro.setBackground(new Color(12, 138, 199));
 		panelMenu.add(btnRegistro);
 		btnRegistro.setLayout(null);
@@ -133,7 +133,7 @@ public class MenuUsuario extends JFrame {
 				dispose();
 			}
 		});
-		btnBusqueda.setBounds(0, 312, 257, 56);
+		btnBusqueda.setBounds(0, 342, 257, 56);
 		btnBusqueda.setBackground(new Color(12, 138, 199));
 		panelMenu.add(btnBusqueda);
 		btnBusqueda.setLayout(null);

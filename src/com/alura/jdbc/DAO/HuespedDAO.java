@@ -47,7 +47,7 @@ public class HuespedDAO {
 				while (resultSet.next()) {
 					huesped.setID(resultSet.getInt(1));
 					n = resultSet.getInt(1);
-					System.out.println(String.format("fue insertado el huesped %s", huesped));
+					JOptionPane.showMessageDialog(null, String.format("fue insertado el huesped %s", huesped));
 				}
 
 				con.commit();

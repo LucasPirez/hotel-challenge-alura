@@ -66,7 +66,8 @@ public class ReservaDAO {
 				try (resultSet) {
 					while (resultSet.next()) {
 						n = resultSet.getInt(1);
-						System.out.println(String.format("Se realizo la siguiente reserva: %s", reserva));
+						
+						JOptionPane.showMessageDialog(null, String.format("Se realizo la siguiente reserva: %s", reserva));
 					}
 				}
 			}
@@ -77,9 +78,7 @@ public class ReservaDAO {
 	}
 	
 	public void editarReserva(Reserva reserva) {
-	
 			try(con){
-				
 				final PreparedStatement statement = con.prepareStatement("UPDATE TBRESERVA SET " +
 												" Fecha_entrada = ? " + 
 												", Fecha_salida = ? " + 
@@ -89,19 +88,18 @@ public class ReservaDAO {
 												" WHERE ID = ?");
 				
 				try(statement){
-					
 					statement.setString(1, reserva.getFecha_entrada());
 					statement.setString(2,reserva.getFecha_salida());
 					statement.setFloat(3, reserva.getValor());
 					statement.setString(4,reserva.getForma_pago());
-					statement.setInt(5,reserva.getID());
-					statement.setString(6, reserva.getTipoHabitacion());
+					statement.setString(5, reserva.getTipoHabitacion());
+					statement.setInt(6,reserva.getID());
 					statement.execute();
 
 					int updateCount = statement.getUpdateCount();
 					
 					if (updateCount == 0) {
-						JOptionPane.showMessageDialog(null, this, " No se ha actualizado ningun valor ", updateCount);
+						JOptionPane.showMessageDialog(null, " No se ha actualizado ningun valor ");
 					} else {
 						JOptionPane.showMessageDialog(null, String.format("Se ha actualizado el huesped %s ", reserva));
 					}

@@ -278,21 +278,19 @@ public class Login extends JFrame {
 	
 	private void Login() {
 			UserDAO userDAO = new UserDAO(new ConnectionFactory().recuperarCenexion());
-			
 	        String contrase=new String (txtContrasena.getPassword());
 	        String usuario = txtUsuario.getText();
-	        String v  = userDAO.verificarUser(usuario);
+	         
+	        Boolean v  = userDAO.verificarUser(usuario,contrase);
 	        
 	        if(v != null) {
-	        	
-	        if(v.equals(contrase)){
+	        	System.out.println(v);
+	        if(v){
 	            MenuUsuario menu = new MenuUsuario();
 	            menu.setVisible(true);
 	            dispose();	 
-	            
 	        }else {
-	            JOptionPane.showMessageDialog(this, "Usuario o Contraseña no válidos");
-
+	          JOptionPane.showMessageDialog(null, "usuario o contrasea invalidos");
 	        }
 	        }
 	} 
@@ -307,6 +305,10 @@ public class Login extends JFrame {
 		
 		userDAO.createUser(usuario,contrase);
 		
+		MenuPrincipal menuPrincipal = new MenuPrincipal();
+		menuPrincipal.setVisible(true);
+		dispose();
+		
 		
 	}
 	
@@ -319,6 +321,7 @@ public class Login extends JFrame {
 	    	  txtContrasena.setText("");
 	    	  txtUsuario.setText("");
 	    	  lblNewLabel.setText("Crear Usuario");
+	    	  
 	      }
 	}
 	

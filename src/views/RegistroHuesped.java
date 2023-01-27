@@ -147,6 +147,41 @@ public class RegistroHuesped extends JFrame {
 		labelAtras.setFont(new Font("Roboto", Font.PLAIN, 23));
 		labelAtras.setBounds(0, 0, 53, 36);
 		btnAtras.add(labelAtras);
+		
+
+		JPanel btnexit = new JPanel();
+		btnexit.setBounds(857, 0, 53, 36);
+		btnexit.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				MenuPrincipal principal = new MenuPrincipal();
+				principal.setVisible(true);
+				dispose();
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				btnexit.setBackground(Color.red);
+				labelExit.setForeground(Color.white);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				btnexit.setBackground(Color.white);
+				labelExit.setForeground(Color.black);
+			}
+		});
+		btnexit.setLayout(null);
+		header.add(btnexit);
+		btnexit.setBackground(Color.white);
+
+		labelExit = new JLabel("X");
+		labelExit.setBounds(0, 0, 53, 36);
+		btnexit.add(labelExit);
+		labelExit.setHorizontalAlignment(SwingConstants.CENTER);
+		labelExit.setForeground(SystemColor.black);
+		labelExit.setFont(new Font("Roboto", Font.PLAIN, 18));
+
 
 		txtNombre = new JTextField();
 		txtNombre.setFont(new Font("Roboto", Font.PLAIN, 16));
@@ -238,20 +273,6 @@ public class RegistroHuesped extends JFrame {
 		lblTitulo.setFont(new Font("Roboto Black", Font.PLAIN, 23));
 		contentPane.add(lblTitulo);
 
-		JLabel lblNumeroReserva = new JLabel("NÚMERO DE RESERVA");
-		lblNumeroReserva.setBounds(560, 474, 253, 14);
-		lblNumeroReserva.setForeground(SystemColor.textInactiveText);
-		lblNumeroReserva.setFont(new Font("Roboto Black", Font.PLAIN, 18));
-		contentPane.add(lblNumeroReserva);
-
-		txtNreserva = new JTextField();
-		txtNreserva.setFont(new Font("Roboto", Font.PLAIN, 16));
-		txtNreserva.setBounds(560, 495, 285, 33);
-		txtNreserva.setColumns(10);
-		txtNreserva.setBackground(Color.WHITE);
-		txtNreserva.setBorder(javax.swing.BorderFactory.createEmptyBorder());
-		contentPane.add(txtNreserva);
-
 		JSeparator separator_1_2 = new JSeparator();
 		separator_1_2.setBounds(560, 170, 289, 2);
 		separator_1_2.setForeground(new Color(12, 138, 199));
@@ -282,43 +303,35 @@ public class RegistroHuesped extends JFrame {
 		separator_1_2_4.setBackground(new Color(12, 138, 199));
 		contentPane.add(separator_1_2_4);
 
-		JSeparator separator_1_2_5 = new JSeparator();
-		separator_1_2_5.setBounds(560, 529, 289, 2);
-		separator_1_2_5.setForeground(new Color(12, 138, 199));
-		separator_1_2_5.setBackground(new Color(12, 138, 199));
-		contentPane.add(separator_1_2_5);
-
 		JPanel btnguardar = new JPanel();
-		btnguardar.setBounds(723, 560, 122, 35);
+		btnguardar.setBounds(723, 480, 122, 35);
 		btnguardar.addMouseListener(new MouseAdapter() {
+			
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				System.out.println(txtApellido.getText());
+				if( txtNombre.getText().equals("") || txtApellido.getText().equals("") ||
+						txtTelefono.getText().equals("") || txtFechaN.getDate() == null) {
+					
+					JOptionPane.showMessageDialog(null, "Todos los campos deben estar completados");
+					
+				} else {
 				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 				String date = format.format(txtFechaN.getDate());
-
+				Huesped huesped = new Huesped(txtNombre.getText(), txtApellido.getText(), date,
+						txtNacionalidad.getSelectedItem().toString(), txtTelefono.getText());
+				huesped.setID(IDEdit);
+				
+				System.out.println(txtFechaN.getDate());
+				
 				try {
-					Huesped huesped = new Huesped(txtNombre.getText(), txtApellido.getText(), date,
-							txtNacionalidad.getSelectedItem().toString(), txtTelefono.getText());
-					huesped.setID(IDEdit);
-					HuespedDAO huespedDAO = new HuespedDAO(new ConnectionFactory().recuperarCenexion());
-
-					if (labelGuardar.getText() == "Guardar Edicion") {
-						huespedDAO.editarHuesped(huesped);
-					} else if (labelGuardar.getText() == "Guardar Reserva Y Huesped") {
-						int b = huespedDAO.guardar(huesped);
-						if (b != -1) {
-							ReservaDAO reserva = new ReservaDAO(new ConnectionFactory().recuperarCenexion());
-							
-							reservaHuespedNuevo.setID_persona(b);
-							reserva.guardarReserva(reservaHuespedNuevo);
-						}
-					} else {
-						guardar(huesped);
-					}
-				} catch (SQLException e2) {
-					e2.printStackTrace();
+					guardar(huesped);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 
+				}
 			}
 		});
 		btnguardar.setLayout(null);
@@ -349,52 +362,30 @@ public class RegistroHuesped extends JFrame {
 		panel.add(logo);
 		logo.setIcon(new ImageIcon(RegistroHuesped.class.getResource("/imagenes/Ha-100px.png")));
 
-		JPanel btnexit = new JPanel();
-		btnexit.setBounds(857, 0, 53, 36);
-		contentPane.add(btnexit);
-		btnexit.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				MenuPrincipal principal = new MenuPrincipal();
-				principal.setVisible(true);
-				dispose();
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				btnexit.setBackground(Color.red);
-				labelExit.setForeground(Color.white);
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				btnexit.setBackground(Color.white);
-				labelExit.setForeground(Color.black);
-			}
-		});
-		btnexit.setLayout(null);
-		btnexit.setBackground(Color.white);
-
-		labelExit = new JLabel("X");
-		labelExit.setBounds(0, 0, 53, 36);
-		btnexit.add(labelExit);
-		labelExit.setHorizontalAlignment(SwingConstants.CENTER);
-		labelExit.setForeground(SystemColor.black);
-		labelExit.setFont(new Font("Roboto", Font.PLAIN, 18));
 	}
 
-	public void guardar(Huesped huesped) throws SQLException {
+	public void guardar(Huesped huesped) throws SQLException   {
+		
 		HuespedDAO huespedDAO = new HuespedDAO(new ConnectionFactory().recuperarCenexion());
 
-	int n=	huespedDAO.guardar(huesped);
-		if(n  != -1) {
-			txtNombre.setText("");
-			txtApellido.setText("");
-			txtNacionalidad.setSelectedIndex(0);
-			txtTelefono.setText("");
-		}else {
-			JOptionPane.showMessageDialog(null,"Ha ocurrido un error");
+		if (labelGuardar.getText() == "Guardar Edicion") {
+			huespedDAO.editarHuesped(huesped);
+		} else if (labelGuardar.getText() == "Guardar Reserva Y Huesped") {
+			int b = huespedDAO.guardar(huesped);
+			if (b != -1) {
+				ReservaDAO reserva = new ReservaDAO(new ConnectionFactory().recuperarCenexion());
+				
+				reservaHuespedNuevo.setID_persona(b);
+				reserva.guardarReserva(reservaHuespedNuevo);
+			}
+		} else {
+			huespedDAO.guardar(huesped);
 		}
+		
+		txtNombre.setText("");
+		txtApellido.setText("");
+		txtTelefono.setText("");
+			
 	}
 
 	public void completeInputs(Huesped huesped) {

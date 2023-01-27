@@ -15,29 +15,32 @@ public class UserDAO {
 		this.con = con;
 	}
 
-	public String verificarUser(String user) {
-		String resultSetPassword = null;
-
+	public Boolean verificarUser(String user, String contasena) {
+		String userString = null;
+		String passwordString = null;
+		
 		try (con) {
-			con.setAutoCommit(false);
+			
 			final PreparedStatement statement = con
 					.prepareStatement("select * from tbusers where aliasUser = '" + user + "'");
 
 			try (statement) {
 				final ResultSet resultSet = statement.executeQuery();
 				try (resultSet) {
+
 					while (resultSet.next()) {
-						resultSetPassword = resultSet.getString("passwordUser");
-					}
+						userString = resultSet.getString("aliasUser");
+						passwordString = resultSet.getString("passwordUser");
 				}
 			}
-			con.commit();
-		} catch (Exception e) {
+	
+		} 
+			}catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		return resultSetPassword;
+		return userString != null && passwordString.equals(contasena);
 	}
 
 	public void createUser(String name, String password) {
@@ -57,8 +60,9 @@ public class UserDAO {
 
 				try (resultSet) {
 					while (resultSet.next()) {
-						JOptionPane.showMessageDialog(null, this,
-								"Se ah creado el usuario: " + name + "password: " + password, 0);
+						JOptionPane.showMessageDialog(null,
+								"Se ah creado el usuario: " + name + "  password: " + password);
+						
 					}
 				}
 			}
